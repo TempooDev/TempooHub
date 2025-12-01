@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { ApiService } from '../api-service';
 import { HttpClient } from '@angular/common/http';
 
 interface ResultObject {
@@ -13,7 +12,6 @@ interface ResultObject {
   styles: ``,
 })
 export class DashboardPage {
-  apiService = inject(ApiService);
   http = inject(HttpClient);
   apiStatus = signal('Loading...');
 
