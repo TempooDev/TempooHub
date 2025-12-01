@@ -1,6 +1,15 @@
 <div class="min-h-screen bg-slate-950 text-slate-50">
-    <th-header />
-    <main class="mx-auto max-w-7xl px-6 pt-8 pb-14 space-y-10">
-        <router-outlet />
+    <!-- Full-height left sidebar -->
+    <aside class="fixed left-0 top-0 h-screen w-64 border-r border-slate-800 bg-slate-900 overflow-auto">
+        <div class="p-4">
+            <th-navigation />
+        </div>
+    </aside>
+
+    <!-- Content shifted to the right of the sidebar -->
+    <main class="ml-64 min-h-screen">
+        <div class="px-6 pt-8 pb-14">
+            <router-outlet />
+        </div>
     </main>
 </div>

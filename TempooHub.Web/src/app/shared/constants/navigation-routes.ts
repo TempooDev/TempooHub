@@ -3,7 +3,7 @@ import { MenuItem } from "primeng/api";
 export const APP_ROUTES = {
     HOME: '',
     ADMIN: 'admin',
-    USER_MANAGEMENT: ''
+    USER_MANAGEMENT: 'admin'
 };
 export type RouteKeys = keyof typeof APP_ROUTES;
 
