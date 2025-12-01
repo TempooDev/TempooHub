@@ -6,7 +6,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5162"
+      "applicationUrl": "http://localhost:5162/scalar"
     },
     "https": {
       "commandName": "Project",
@@ -14,7 +14,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7114;http://localhost:5162"
+      "applicationUrl": "https://localhost:7114/scalar;http://localhost:5162/scalar"
     },
     "Container (Dockerfile)": {
       "commandName": "Docker",

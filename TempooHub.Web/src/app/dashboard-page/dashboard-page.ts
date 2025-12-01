@@ -1,4 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
+import { ApiService } from '../api-service';
+import { HttpClient } from '@angular/common/http';
+
+interface ResultObject {
+  message: string;
+}
 
 @Component({
   selector: 'th-dashboard-page',
@@ -7,5 +13,18 @@ import { Component } from '@angular/core';
   styles: ``,
 })
 export class DashboardPage {
+  apiService = inject(ApiService);
+  http = inject(HttpClient);
+  apiStatus = signal('Loading...');
 
+  constructor() {
+    this.loadApiStatus();
+  }
+
+  loadApiStatus() {
+    this.http.get<ResultObject>('/api').subscribe({
+      next: result => { this.apiStatus.set(result.message); },
+      error: err => { this.apiStatus.set(`Error: ${err.message}`); }
+    });
+  }
 }
