@@ -1,6 +1,0 @@
-@TempooHub.Api_HostAddress = http://localhost:5162
-
-GET {{TempooHub.Api_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
