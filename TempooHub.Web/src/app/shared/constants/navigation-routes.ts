@@ -3,11 +3,14 @@ import { MenuItem } from "primeng/api";
 export const APP_ROUTES = {
     HOME: '',
     ADMIN: 'admin',
-    USER_MANAGEMENT: 'admin'
+    USER_MANAGEMENT: 'users'
 };
 export type RouteKeys = keyof typeof APP_ROUTES;
 
 export function getPath(key: RouteKeys): string {
+    if (key === 'USER_MANAGEMENT') {
+        return `/admin/${APP_ROUTES.USER_MANAGEMENT}`;
+    }
     return `/${APP_ROUTES[key]}`;
 }
 

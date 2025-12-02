@@ -3,6 +3,7 @@ import { DashboardPage } from './dashboard-page/dashboard-page';
 import { LayoutComponent } from './shared/layout/layout';
 import { AdminPanelPage } from './admin-panel/admin-panel';
 import { APP_ROUTES } from './shared/constants/navigation-routes';
+import { UserManagment } from './admin-panel/user-managment/user-managment';
 
 export const routes: Routes = [
     {
@@ -16,6 +17,10 @@ export const routes: Routes = [
             {
                 path: APP_ROUTES.ADMIN,
                 component: AdminPanelPage
+            },
+            {
+                path: `${APP_ROUTES.ADMIN}/${APP_ROUTES.USER_MANAGEMENT}`,
+                component: UserManagment
             }
         ]
     }

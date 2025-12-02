@@ -1,8 +1,8 @@
 <div class="card">
-    <p-menu [model]="routes" class="flex justify-center" styleClass="w-full md:w-64 h-screen flex flex-col">
+    <p-menu [model]="routes" class="flex justify-center" styleClass="w-full md:w-64 h-full flex flex-col">
         <ng-template #start>
             <span class="inline-flex items-center gap-1 px-2 py-2">
-                <span class="text-xl font-semibold">Tempoo<span class="text-primary">Hub</span></span>
+                <a routerLink="/" class="text-xl font-semibold">Tempoo<span class="text-primary">Hub</span></a>
             </span>
         </ng-template>
 
@@ -11,7 +11,6 @@
                 <span [class]="item.icon"></span>
                 <span class="text-primary font-bold">{{ item.label }}</span>
                 @if(item.badge){
-
                 <p-badge class="ml-auto" [value]="item['badge']"></p-badge>
                 }
                 @if(item.shortcut){
@@ -34,18 +33,6 @@
                     item['shortcut'] }}</span>
                 }
             </a>
-        </ng-template>
-
-        <ng-template #end>
-            <button pRipple
-                class="relative overflow-hidden w-full border-0 bg-transparent flex items-start p-2 pl-4 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-none cursor-pointer transition-colors duration-200">
-                <p-avatar image="https://primefaces.org/cdn/primeng/images/demo/avatar/amyelsner.png" class="mr-2"
-                    shape="circle"></p-avatar>
-                <span class="inline-flex flex-col">
-                    <span class="font-bold">Amy Elsner</span>
-                    <span class="text-sm">Admin</span>
-                </span>
-            </button>
         </ng-template>
     </p-menu>
 </div>
