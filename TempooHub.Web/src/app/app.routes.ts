@@ -4,6 +4,8 @@ import { LayoutComponent } from './shared/layout/layout';
 import { AdminPanelPage } from './admin-panel/admin-panel';
 import { APP_ROUTES } from './shared/constants/navigation-routes';
 import { UserManagment } from './admin-panel/user-managment/user-managment';
+import { LoginComponent } from './auth/login-component/login-component';
+import { canActivateAuthRole } from './shared/guards/auth-role-guard';
 
 export const routes: Routes = [
     {
@@ -20,6 +22,8 @@ export const routes: Routes = [
             },
             {
                 path: `${APP_ROUTES.ADMIN}/${APP_ROUTES.USER_MANAGEMENT}`,
+                canActivate: [canActivateAuthRole],
+                data: { role: 'view-profile' },
                 component: UserManagment
             }
         ]

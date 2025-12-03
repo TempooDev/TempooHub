@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-interface ResultObject {
+export interface ResultObject {
   message: string;
 }
 
