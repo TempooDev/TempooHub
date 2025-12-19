@@ -24,7 +24,7 @@ export const routes: Routes = [
             },
             {
                 path: `${APP_ROUTES.ADMIN}/${APP_ROUTES.USER_MANAGEMENT}`,
-                data: { role: 'view-profile' },
+                data: { role: 'test-role' },
                 component: UserManagment
             }
         ]

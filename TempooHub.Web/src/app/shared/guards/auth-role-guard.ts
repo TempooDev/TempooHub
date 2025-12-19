@@ -16,7 +16,7 @@ const isAccessAllowed = async (
     await keycloak.login({ redirectUri: window.location.origin + state.url });
     return false;
   }
-  
+
   const requiredRole = route.data['role'];
 
   if (!requiredRole) {
@@ -26,19 +26,16 @@ const isAccessAllowed = async (
   const hasRole = (role: string): boolean => {
     const hasRealmRole = grantedRoles.realmRoles.includes(role);
     
-    // Busca en roles de cliente (account, tempoo-hub-client, etc)
     const hasResourceRole = Object.values(grantedRoles.resourceRoles)
       .some((roles) => roles.includes(role));
 
     return hasRealmRole || hasResourceRole;
   };
 
-  // 4. Verificación final
   if (hasRole(requiredRole)) {
     return true;
   }
 
-  // Si está autenticado pero no tiene el rol, mandamos a Forbidden
   return router.parseUrl('/forbidden');
 };
 
