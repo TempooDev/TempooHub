@@ -11,6 +11,7 @@ export const routes: Routes = [
     {
         path: '',
         component: LayoutComponent,
+        canActivate: [canActivateAuthRole],
         children: [
             {
                 path: APP_ROUTES.HOME,
@@ -19,12 +20,10 @@ export const routes: Routes = [
             {
                 path: APP_ROUTES.ADMIN,
                 component: AdminPanelPage,
-                canActivate: [canActivateAuthRole],
                 data: { role: 'admin' }
             },
             {
                 path: `${APP_ROUTES.ADMIN}/${APP_ROUTES.USER_MANAGEMENT}`,
-                canActivate: [canActivateAuthRole],
                 data: { role: 'view-profile' },
                 component: UserManagment
             }
