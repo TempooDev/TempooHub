@@ -11,9 +11,18 @@ import { ResultObject } from '../../dashboard-page/dashboard-page';
 export class UserManagment {
   http = inject(HttpClient);
   apiStatus = signal('Loading...');
+  checkAdminRole = signal('Checking...');
 
   constructor() {
     this.loadApiStatus();
+    this.loadAdminRole();
+  }
+
+  loadAdminRole() {
+    this.http.get<ResultObject>('/api/admin').subscribe({
+      next: result => { this.checkAdminRole.set(result.message); },
+      error: err => { this.checkAdminRole.set(`Error: ${err.message}`); }
+    });
   }
 
   loadApiStatus() {

@@ -18,7 +18,9 @@ export const routes: Routes = [
             },
             {
                 path: APP_ROUTES.ADMIN,
-                component: AdminPanelPage
+                component: AdminPanelPage,
+                canActivate: [canActivateAuthRole],
+                data: { role: 'admin' }
             },
             {
                 path: `${APP_ROUTES.ADMIN}/${APP_ROUTES.USER_MANAGEMENT}`,
