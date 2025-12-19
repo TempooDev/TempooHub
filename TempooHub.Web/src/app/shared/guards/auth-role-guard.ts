@@ -23,11 +23,28 @@ const isAccessAllowed = async (
     return true;
   }
 
+  // build role lists from tokenParsed as a fallback (some setups expose roles under token.resource_access)
+  const tokenParsed = (keycloak.tokenParsed as any) || {};
+  const tokenRealmRoles: string[] = tokenParsed.realm_access?.roles || [];
+  const tokenResourceRoles: Record<string, string[]> = {};
+  if (tokenParsed.resource_access) {
+    Object.keys(tokenParsed.resource_access).forEach((k) => {
+      tokenResourceRoles[k] = tokenParsed.resource_access[k].roles || [];
+    });
+  }
+
   const hasRole = (role: string): boolean => {
-    const hasRealmRole = grantedRoles.realmRoles.includes(role);
-    
-    const hasResourceRole = Object.values(grantedRoles.resourceRoles)
-      .some((roles) => roles.includes(role));
+    const hasRealmRole = (grantedRoles?.realmRoles?.includes(role)) ?? tokenRealmRoles.includes(role);
+
+    const hasResourceRoleFromGranted = grantedRoles?.resourceRoles
+      ? Object.values(grantedRoles.resourceRoles).some((roles) => roles.includes(role))
+      : false;
+
+    const hasResourceRoleFromToken = Object.values(tokenResourceRoles).some((roles) => roles.includes(role));
+
+    const hasResourceRole = hasResourceRoleFromGranted || hasResourceRoleFromToken;
+
+    console.debug('[AuthGuard] requiredRole=', requiredRole, 'checkRole=', role, { hasRealmRole, hasResourceRole, tokenRealmRoles, tokenResourceRoles, grantedRoles });
 
     return hasRealmRole || hasResourceRole;
   };

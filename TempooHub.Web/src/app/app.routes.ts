@@ -11,7 +11,7 @@ export const routes: Routes = [
     {
         path: '',
         component: LayoutComponent,
-        canActivate: [canActivateAuthRole],
+        canActivateChild: [canActivateAuthRole],
         children: [
             {
                 path: APP_ROUTES.HOME,
@@ -24,7 +24,7 @@ export const routes: Routes = [
             },
             {
                 path: `${APP_ROUTES.ADMIN}/${APP_ROUTES.USER_MANAGEMENT}`,
-                data: { role: 'test-role' },
+                data: { role: 'admin' },
                 component: UserManagment
             }
         ]
