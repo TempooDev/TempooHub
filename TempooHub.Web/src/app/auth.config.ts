@@ -11,7 +11,11 @@ const authConfig: AuthConfig = {
 };
 
 export function initializeAuth(oauth: OAuthService) {
-  return () => oauth.loadDiscoveryDocumentAndTryLogin();
+  return async () => {
+    oauth.configure(authConfig);
+    oauth.setupAutomaticSilentRefresh();
+    await oauth.loadDiscoveryDocumentAndTryLogin();
+  };
 }
 
 export const authProviders: Provider[] = [
