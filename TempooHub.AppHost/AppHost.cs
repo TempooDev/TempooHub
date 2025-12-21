@@ -10,19 +10,19 @@ var dbServer = builder.AddPostgres("postgres-server")
 
 var tempooHubDb = dbServer.AddDatabase("tempoohub-db");
 
-var keycloakUser = builder.AddParameter("keycloak-user");
-var keycloakPass = builder.AddParameter("keycloak-pass", secret:true);
-
-var keycloak = builder
-    .AddKeycloak("keycloak", 8080, keycloakUser, keycloakPass)
+// Reemplazado Keycloak por un proyecto AuthServer que usa OpenIddict
+var authServer = builder.AddProject<Projects.TempooHub_AuthServer>("tempoohub-auth")
+    .WithHttpEndpoint(env: "AUTH_PORT", port: 5000)
+    .WithReference(tempooHubDb)
+    .WaitFor(tempooHubDb)
     .WithDataVolume()
     .WithLifetime(ContainerLifetime.Persistent);
 
 var api = builder.AddProject<Projects.TempooHub_Api>("tempoohub-api")
-        .WithReference(keycloak)
-        .WaitFor(keycloak)
-        .WithReference(tempooHubDb)
-        .WaitFor(tempooHubDb);
+    .WithReference(authServer)
+    .WaitFor(authServer)
+    .WithReference(tempooHubDb)
+    .WaitFor(tempooHubDb);
 
 builder.AddJavaScriptApp("tempoohub-web", "../TempooHub.Web", runScriptName: "start")
     .WithReference(api)
