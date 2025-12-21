@@ -116,13 +116,14 @@ using (var scope = app.Services.CreateScope())
         {
             ClientId = "tempoohub-web",
             DisplayName = "TempooHub Web SPA",
-            RedirectUris = { new Uri("http://localhost:4200/"), new Uri("http://tempoohub-web:4200/") },
+            RedirectUris = { new Uri("http://localhost:4200/"), new Uri("http://tempoohub-web:4200/") , new Uri("http://localhost:4200/silent-refresh.html"), new Uri("http://tempoohub-web:4200/silent-refresh.html")},
             Permissions =
             {
                 Permissions.Endpoints.Authorization,
                 Permissions.Endpoints.Token,
                 Permissions.Endpoints.Logout,
                 Permissions.GrantTypes.AuthorizationCode,
+                Permissions.GrantTypes.RefreshToken,
                 Permissions.ResponseTypes.Code,
                 Permissions.Prefixes.Scope + "openid",
                 Permissions.Prefixes.Scope + "profile",

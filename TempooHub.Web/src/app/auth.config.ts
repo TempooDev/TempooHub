@@ -4,9 +4,11 @@ import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 const authConfig: AuthConfig = {
   issuer: 'http://tempoohub-auth:5001',
   redirectUri: window.location.origin + '/',
+  silentRefreshRedirectUri: window.location.origin + '/silent-refresh.html',
   clientId: 'tempoohub-web',
   responseType: 'code',
   scope: 'openid profile email api',
+  useRefreshToken: true,
   requireHttps: false
 };
 
