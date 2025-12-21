@@ -2,24 +2,17 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideKeycloakAngular } from './keycloak.config';
-import { createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor } from 'keycloak-angular';
-
-const allUrlsCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
-  urlPattern: /.*/ // todas las URLs
-});
+import { provideHttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { authProviders } from './auth.config';
+import { AuthInterceptor } from './auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideNoopAnimations(),
-    provideKeycloakAngular(),
-    provideHttpClient(withInterceptors([includeBearerTokenInterceptor])),
-    {
-      provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
-      useValue: [allUrlsCondition]
-    }
+    ...authProviders,
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    provideHttpClient()
   ]
 };
