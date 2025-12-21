@@ -26,11 +26,10 @@ var tempooHubAuthDb = authDbServer.AddDatabase("tempoohub-auth-db");
 var tempooHubApiSecret = builder.AddParameter("tempoohub-api-secret", secret: true);
 
 var authServer = builder.AddProject<Projects.TempooHub_AuthServer>("tempoohub-auth")
-    .WithHttpEndpoint(env: "AUTH_PORT", port: 5000)
+    .WithHttpEndpoint(env: "AUTH_PORT", port: 5001)
     .WithReference(tempooHubAuthDb)
     .WaitFor(tempooHubAuthDb)
-    .WithDataVolume()
-    .WithLifetime(ContainerLifetime.Persistent);
+    ;
 
 var api = builder.AddProject<Projects.TempooHub_Api>("tempoohub-api")
     .WithReference(authServer)

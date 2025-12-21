@@ -2,7 +2,7 @@ import { APP_INITIALIZER, Provider } from '@angular/core';
 import { AuthConfig, OAuthService } from 'angular-oauth2-oidc';
 
 const authConfig: AuthConfig = {
-  issuer: 'http://tempoohub-auth:5000',
+  issuer: 'http://tempoohub-auth:5001',
   redirectUri: window.location.origin + '/',
   clientId: 'tempoohub-web',
   responseType: 'code',
