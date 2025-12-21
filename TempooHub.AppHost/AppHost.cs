@@ -29,7 +29,6 @@ var authServer = builder.AddProject<Projects.TempooHub_AuthServer>("tempoohub-au
     .WithHttpEndpoint(env: "AUTH_PORT", port: 5000)
     .WithReference(tempooHubAuthDb)
     .WaitFor(tempooHubAuthDb)
-    .WithEnvironmentVariable("TEMPOOHUB_API_SECRET", tempooHubApiSecret)
     .WithDataVolume()
     .WithLifetime(ContainerLifetime.Persistent);
 
