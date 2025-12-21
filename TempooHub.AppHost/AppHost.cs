@@ -10,11 +10,26 @@ var dbServer = builder.AddPostgres("postgres-server")
 
 var tempooHubDb = dbServer.AddDatabase("tempoohub-db");
 
+// Crear una BBDD propia para AuthServer (no referenciar tempoohub-db)
+var authDbUser = builder.AddParameter("tempoohub-auth-user");
+var authDbPass = builder.AddParameter("tempoohub-auth-password", secret: true);
+var authDbServer = builder.AddPostgres("postgres-auth")
+    .WithPgAdmin()
+    .WithUserName(authDbUser)
+    .WithPassword(authDbPass)
+    .WithLifetime(ContainerLifetime.Persistent);
+
+var tempooHubAuthDb = authDbServer.AddDatabase("tempoohub-auth-db");
+
 // Reemplazado Keycloak por un proyecto AuthServer que usa OpenIddict
+// Client secret for the API (seeded into AuthServer)
+var tempooHubApiSecret = builder.AddParameter("tempoohub-api-secret", secret: true);
+
 var authServer = builder.AddProject<Projects.TempooHub_AuthServer>("tempoohub-auth")
     .WithHttpEndpoint(env: "AUTH_PORT", port: 5000)
-    .WithReference(tempooHubDb)
-    .WaitFor(tempooHubDb)
+    .WithReference(tempooHubAuthDb)
+    .WaitFor(tempooHubAuthDb)
+    .WithEnvironmentVariable("TEMPOOHUB_API_SECRET", tempooHubApiSecret)
     .WithDataVolume()
     .WithLifetime(ContainerLifetime.Persistent);
 
