@@ -3,7 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using OpenIddict.Abstractions;
 using TempooHub.AuthServer.Data;
 using OpenIddict.EntityFrameworkCore.Models;
-using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -90,7 +89,7 @@ using (var scope = app.Services.CreateScope())
     }
 
     // Seed OpenIddict clients
-    var appManager = scope.ServiceProvider.GetRequiredService<OpenIddictApplicationManager<OpenIddictEntityFrameworkCoreApplication>>();
+    var appManager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
 
     if (await appManager.FindByClientIdAsync("tempoohub-api") == null)
     {

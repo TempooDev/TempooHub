@@ -8,8 +8,8 @@ export const provideKeycloakAngular = () =>
     provideKeycloak({
         config: {
             realm: 'tempoohub',
-            url: 'http://localhost:8080', //TODO: Update to your Keycloak server URL
-            clientId: 'tempoo-hub-client'
+            url: 'http://tempoohub-auth:5000',
+            clientId: 'tempoohub-web'
         },
         initOptions: {
             onLoad: 'check-sso',
