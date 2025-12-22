@@ -1,61 +1,31 @@
-import { Component, effect, inject, signal, Signal } from '@angular/core';
-import { Navigation } from "../navigation/navigation";
+import { Component, computed, effect, inject, signal, Signal } from '@angular/core';
 import { AvatarModule } from 'primeng/avatar';
-import { BadgeDirective, BadgeModule } from "primeng/badge";
+import { BadgeModule } from 'primeng/badge';
 import { OverlayBadgeModule } from "primeng/overlaybadge";
-import { KEYCLOAK_EVENT_SIGNAL, KeycloakEventType, typeEventArgs, ReadyArgs } from 'keycloak-angular';
-import Keycloak from 'keycloak-js';
-import keycloak from 'keycloak-js';
-
-interface UserProfile {
-  name: string;
-  email: string;
-  role?: string;
-}
+import { AuthService } from '../auth.service';
+import { Router } from '@angular/router';
+import { TitleCasePipe } from '@angular/common';
 
 @Component({
   selector: 'th-header',
-  imports: [AvatarModule, BadgeModule, OverlayBadgeModule],
+  imports: [AvatarModule, BadgeModule, OverlayBadgeModule, TitleCasePipe],
   templateUrl: './header.html',
-  styles: ``,
 })
-export class Header {
-  authenticated = false;
-  user = signal<UserProfile | null>(null);
-  keycloakStatus: string | undefined;
-  private readonly keycloak = inject(Keycloak);
-  private readonly keycloakSignal = inject(KEYCLOAK_EVENT_SIGNAL);
+export class HeaderComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  async ngOnInit(): Promise<void> {
-    const profile = await this.keycloak.loadUserProfile();
-    console.log('User profile loaded:', profile);
-    this.user.set(this.keycloak.authenticated ? {
-      name: profile?.firstName || '',
-      email: profile?.email || '',
-    } : null);
-  }
+  user = this.authService.currentUser;
 
-  constructor() {
-    effect(() => {
-      const keycloakEvent = this.keycloakSignal();
-
-      this.keycloakStatus = keycloakEvent.type;
-
-      if (keycloakEvent.type === KeycloakEventType.Ready) {
-        this.authenticated = typeEventArgs<ReadyArgs>(keycloakEvent.args);
-      }
-
-      if (keycloakEvent.type === KeycloakEventType.AuthLogout) {
-        this.authenticated = false;
-      }
-    });
-  }
+  authenticated = computed(() => !!this.user());
 
   login() {
-    this.keycloak.login();
+    this.router.navigate(['/login']);
   }
 
   logout() {
-    this.keycloak.logout();
+    this.authService.logout().subscribe({
+      next: () => this.router.navigate(['/login']),
+    });
   }
 }

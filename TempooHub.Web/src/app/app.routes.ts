@@ -9,13 +9,18 @@ import { ROLES } from './shared/constants/roles';
 
 export const routes: Routes = [
     {
+        path: 'login',
+        loadComponent: () => import('./auth/login-component/login-component').then(m => m.LoginComponent)
+    },
+    {
         path: '',
         component: LayoutComponent,
         canActivateChild: [canActivateAuthRole],
         children: [
             {
                 path: APP_ROUTES.HOME,
-                component: DashboardPage
+                component: DashboardPage,
+                pathMatch: 'full'
             },
             {
                 path: APP_ROUTES.ADMIN,
@@ -28,5 +33,9 @@ export const routes: Routes = [
                 component: UserManagment
             }
         ]
+    },
+    {
+        path: 'forbidden',
+        loadComponent: () => import('./auth/forbidden/forbidden').then(m => m.ForbiddenComponent)
     }
 ];

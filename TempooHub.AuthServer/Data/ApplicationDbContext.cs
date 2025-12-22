@@ -13,6 +13,5 @@ public class ApplicationDbContext : IdentityDbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.UseOpenIddict();
     }
 }

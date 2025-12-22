@@ -1,137 +1,123 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using OpenIddict.Abstractions;
 using TempooHub.AuthServer.Data;
-using OpenIddict.EntityFrameworkCore.Models;
-using static OpenIddict.Abstractions.OpenIddictConstants;
+using Scalar.AspNetCore;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddServiceDefaults();
 
 // Configure EF Core with Postgres (uses the tempoohub-db from AppHost)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
-    // Try common Aspire-provided connection keys, then fallback to DefaultConnection and a reasonable default.
     var configuration = builder.Configuration;
-        var cs = configuration.GetConnectionString("tempoohub-auth-db")
-            ?? configuration.GetConnectionString("postgres-auth")
-            ?? configuration.GetConnectionString("DefaultConnection")
-            // Aspire sometimes exposes connection under Aspire:Databases:<name>:ConnectionString
-            ?? configuration["Aspire:Databases:tempoohub-auth-db:ConnectionString"]
-            ?? configuration["Aspire:Databases:postgres-auth:ConnectionString"]
-            ?? "Host=postgres-auth;Database=tempoohub-auth-db;Username=tempoohub-auth;Password=tempoohub-auth";
+    var cs = configuration.GetConnectionString("tempoohub-auth-db");
 
     options.UseNpgsql(cs);
-
-    // Register the OpenIddict entity sets.
-    options.UseOpenIddict();
 });
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
-    .AddEntityFrameworkStores<ApplicationDbContext>()
-    .AddDefaultTokenProviders();
-
-builder.Services.AddOpenIddict()
-    .AddCore(options =>
-    {
-        options.UseEntityFrameworkCore().UseDbContext<ApplicationDbContext>();
-    })
-    .AddServer(options =>
-    {
-        options.SetTokenEndpointUris("/connect/token");
-        options.SetAuthorizationEndpointUris("/connect/authorize");
-
-        options.AllowAuthorizationCodeFlow().RequireProofKeyForCodeExchange();
-        options.AllowClientCredentialsFlow();
-
-        options.AcceptAnonymousClients();
-
-        options.UseAspNetCore()
-               .EnableTokenEndpointPassthrough()
-               .EnableAuthorizationEndpointPassthrough();
-
-        options.DisableAccessTokenEncryption();
-    })
-    .AddValidation(options =>
-    {
-        options.UseLocalServer();
-        options.UseAspNetCore();
-    });
+builder.Services.AddIdentityApiEndpoints<IdentityUser>()
+    .AddRoles<IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.AddControllers();
+builder.Services.AddAuthorization();
 
-// CORS for the SPA
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(policy => policy
-        .WithOrigins("http://localhost:4200", "http://tempoohub-web:4200")
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        .AllowCredentials());
+    options.AddPolicy("AngularPolicy", policy =>
+    {
+        policy.WithOrigins("http://localhost:4200") // URL de tu Angular
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials(); // REQUERIDO para enviar Cookies
+    });
 });
+
+builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-app.MapGet("/", () => Results.Ok(new { message = "TempooHub AuthServer (OpenIddict)" }));
-app.MapControllers();
+app.UseCors("AngularPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapDefaultEndpoints();
 
-// Ensure DB created and seeded minimally
+if (app.Environment.IsDevelopment())
+{
+    app.UseDeveloperExceptionPage();
+    app.MapOpenApi();
+}
+app.MapGet("/", () => Results.Ok(new { message = "TempooHub AuthServer (OpenIddict)" }));
+app.MapIdentityApi<IdentityUser>();
+app.MapScalarApiReference("/api-docs");
+app.MapScalarApiReference("/docs");
+
+
+#region auth
+app.MapGet("/manage/user-details", async (
+    ClaimsPrincipal claimsUser,
+    UserManager<IdentityUser> userManager) =>
+{
+    var userId = claimsUser.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (userId == null) return Results.Unauthorized();
+
+    var user = await userManager.FindByIdAsync(userId);
+    if (user == null) return Results.NotFound();
+
+    var roles = await userManager.GetRolesAsync(user);
+
+    return Results.Ok(new
+    {
+        email = user.Email,
+        roles = roles
+    });
+}).RequireAuthorization();
+
+app.MapPost("/setup-role", async (
+    RoleAssignmentRequest request,
+    UserManager<IdentityUser> userManager,
+    RoleManager<IdentityRole> roleManager) =>
+{
+    if (!await roleManager.RoleExistsAsync(request.RoleName))
+    {
+        await roleManager.CreateAsync(new IdentityRole(request.RoleName));
+    }
+
+    var user = await userManager.FindByEmailAsync(request.Email);
+    if (user == null) return Results.NotFound("Usuario no encontrado");
+
+    await userManager.AddToRoleAsync(user, request.RoleName);
+    return Results.Ok($"Rol {request.RoleName} asignado");
+});
+app.MapPost("/logout", async (SignInManager<IdentityUser> signInManager) =>
+{
+    await signInManager.SignOutAsync();
+    return Results.Ok();
+}).RequireAuthorization();
+#endregion
+app.UseHttpsRedirection();
+
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.EnsureCreated();
-
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-    var testUser = await userManager.FindByNameAsync("admin");
-    if (testUser == null)
+    var services = scope.ServiceProvider;
+    try
     {
-        var admin = new IdentityUser("admin");
-        await userManager.CreateAsync(admin, "Admin123!");
-    }
-
-    // Seed OpenIddict clients
-    var appManager = scope.ServiceProvider.GetRequiredService<IOpenIddictApplicationManager>();
-
-    if (await appManager.FindByClientIdAsync("tempoohub-api") == null)
-    {
-        // Read secret from environment (populated by AppHost) or fallback to seeded value
-        var apiSecret = Environment.GetEnvironmentVariable("TEMPOOHUB_API_SECRET") ?? "tempoohub-api-secret";
-
-        await appManager.CreateAsync(new OpenIddictApplicationDescriptor
+        var context = services.GetRequiredService<ApplicationDbContext>();
+        if (context.Database.IsRelational())
         {
-            ClientId = "tempoohub-api",
-            ClientSecret = apiSecret,
-            DisplayName = "TempooHub API",
-            Permissions =
-            {
-                Permissions.Endpoints.Token,
-                Permissions.GrantTypes.ClientCredentials,
-                Permissions.Prefixes.Scope + "api"
-            }
-        });
+            context.Database.Migrate();
+        }
     }
-
-    if (await appManager.FindByClientIdAsync("tempoohub-web") == null)
+    catch (Exception ex)
     {
-        await appManager.CreateAsync(new OpenIddictApplicationDescriptor
-        {
-            ClientId = "tempoohub-web",
-            DisplayName = "TempooHub Web SPA",
-            RedirectUris = { new Uri("http://localhost:4200/"), new Uri("http://tempoohub-web:4200/") , new Uri("http://localhost:4200/silent-refresh.html"), new Uri("http://tempoohub-web:4200/silent-refresh.html")},
-            Permissions =
-            {
-                Permissions.Endpoints.Authorization,
-                Permissions.Endpoints.Token,
-                Permissions.Endpoints.Logout,
-                Permissions.GrantTypes.AuthorizationCode,
-                Permissions.GrantTypes.RefreshToken,
-                Permissions.ResponseTypes.Code,
-                Permissions.Prefixes.Scope + "openid",
-                Permissions.Prefixes.Scope + "profile",
-                Permissions.Prefixes.Scope + "email",
-                Permissions.Prefixes.Scope + "api"
-            }
-        });
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "Ocurrió un error al aplicar las migraciones.");
     }
 }
 
 app.Run();
+
+public record RoleAssignmentRequest(string Email, string RoleName);

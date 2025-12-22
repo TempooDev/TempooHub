@@ -1,36 +1,40 @@
-import { Component, effect, inject } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { KEYCLOAK_EVENT_SIGNAL, KeycloakEventType, ReadyArgs, typeEventArgs } from 'keycloak-angular';
-import Keycloak from 'keycloak-js';
+import { AuthService } from '../../shared/auth.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'th-login-component',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './login-component.html',
 })
 export class LoginComponent {
-  authenticated = false;
-  keycloakStatus: string | undefined;
-  private readonly keycloak = inject(Keycloak);
-  private readonly keycloakSignal = inject(KEYCLOAK_EVENT_SIGNAL);
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  constructor(private router: Router) {
-    effect(() => {
-      const keycloakEvent = this.keycloakSignal();
+  // Signals para manejar el estado de la UI
+  email = signal('');
+  password = signal('');
+  errorMessage = signal<string | null>(null);
+  isLoading = signal(false);
 
-      this.keycloakStatus = keycloakEvent.type;
+  onSubmit() {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
 
-      if (keycloakEvent.type === KeycloakEventType.Ready) {
-        this.authenticated = typeEventArgs<ReadyArgs>(keycloakEvent.args);
-      }
-
-      if (keycloakEvent.type === KeycloakEventType.AuthLogout) {
-        this.authenticated = false;
+    this.authService.login(this.email(), this.password()).subscribe({
+      next: () => {
+        // Al ser exitoso, el AuthService ya actualizó la signal currentUser
+        this.authService.checkStatus().subscribe(() => {
+        this.router.navigate(['/']); 
+      });
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        // Manejo de errores de .NET Identity
+        this.errorMessage.set('Credenciales incorrectas o servidor no disponible');
+        console.error('Login error:', err);
       }
     });
-  }
-
-  login() {
-    this.keycloak.login();
   }
 }

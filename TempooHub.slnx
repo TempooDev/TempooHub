@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="TempooHub.Api/TempooHub.Api.csproj" />
   <Project Path="TempooHub.AppHost/TempooHub.AppHost.csproj" />
+  <Project Path="TempooHub.AuthServer/TempooHub.AuthServer.csproj" />
   <Project Path="TempooHub.ServiceDefaults/TempooHub.ServiceDefaults.csproj" />
 </Solution>

@@ -1,17 +1,31 @@
-<header class="bg-slate-900 shadow-sm card flex items-center">
-    @if (!authenticated) {
-    <button class="px-4 py-2 m-2 bg-blue-900 text-white rounded" (click)="login()">Login</button>
-    } @else {
-    <div class="flex items-center">
-        <button pRipple
-            class="relative overflow-hidden border-0 bg-transparent flex justify-end p-2 pl-4 hover:bg-surface-100 dark:hover:bg-surface-800 rounded-none cursor-pointer transition-colors duration-200">
-            <span class="inline-flex flex-col text-left">
-                <span class="font-bold">{{ user()?.name }}</span>
-                <span class="text-sm">{{ user()?.email }}</span>
-            </span>
-        </button>
+<header class="bg-slate-900 shadow-sm card flex items-center justify-between px-4">
+    <div class="text-white font-bold">TempooHub</div>
 
-        <button class="px-4 py-2 m-2 bg-blue-900 text-white rounded" (click)="logout()">Logout</button>
-    </div>
+    @if (!authenticated()) {
+        <button 
+            class="px-4 py-2 m-2 bg-blue-900 text-white rounded hover:bg-blue-800 transition" 
+            (click)="login()">
+            Login
+        </button>
+    } @else {
+        <div class="flex items-center">
+            <button pRipple
+                class="relative overflow-hidden border-0 bg-transparent flex justify-end p-2 pl-4 hover:bg-slate-800 text-white rounded cursor-pointer transition-colors duration-200">
+                <span class="inline-flex flex-col text-left">
+                    <span class="font-bold text-white">
+                        {{ user()?.email?.split('@')?.at(0) | titlecase }}
+                    </span>
+                    <span class="text-sm text-slate-400">
+                        {{ user()?.email }}
+                    </span>
+                </span>
+            </button>
+
+            <button 
+                class="px-4 py-2 m-2 bg-red-900 text-white rounded hover:bg-red-800 transition" 
+                (click)="logout()">
+                Logout
+            </button>
+        </div>
     }
 </header>
