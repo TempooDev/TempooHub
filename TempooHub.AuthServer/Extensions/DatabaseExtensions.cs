@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using TempooHub.AuthServer.Data;
+
 namespace TempooHub.AuthServer.Extensions
 {
     public static class DatabaseExtensions

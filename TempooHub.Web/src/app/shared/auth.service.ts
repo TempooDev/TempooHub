@@ -14,13 +14,13 @@ export interface UserProfile {
 export class AuthService {
   private http = inject(HttpClient);
   private router = inject(Router);
-  private readonly API_URL = '/api';
+  private readonly API_URL = '/api/auth';
 
   currentUser = signal<UserProfile | null>(null);
 
   // Método para verificar sesión al cargar la app
   checkStatus() {
-    return this.http.get<UserProfile>(`${this.API_URL}/manage/user-details`).pipe(
+    return this.http.get<UserProfile>(`${this.API_URL}/manage/user-details`, { withCredentials: true }).pipe(
       tap(user => this.currentUser.set(user)),
       catchError(() => {
         this.currentUser.set(null);
@@ -39,7 +39,7 @@ export class AuthService {
   }
 
   logout() {
-    return this.http.post(`${this.API_URL}/logout`, {}).pipe(
+    return this.http.post(`${this.API_URL}/logout`, {}, { withCredentials: true }).pipe(
       tap(() => {
         this.currentUser.set(null);
         this.router.navigate(['/login']);

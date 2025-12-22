@@ -1,3 +1,5 @@
+using TempooHub.AuthServer.Extensions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
@@ -9,9 +11,6 @@ builder.AddAuthInfrastructure();
 var app = builder.Build();
 
 app.UseAuthServerPipeline();
-
-// Map auth endpoints (moved to EndpointExtensions)
-app.MapAuthEndpoints();
 
 app.UseHttpsRedirection();
 

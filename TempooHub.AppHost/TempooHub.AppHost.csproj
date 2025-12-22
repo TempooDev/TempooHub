@@ -14,6 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../TempooHub.Proxy/TempooHub.Proxy.csproj" />
     <ProjectReference Include="..\TempooHub.Api\TempooHub.Api.csproj" />
     <ProjectReference Include="..\TempooHub.AuthServer\TempooHub.AuthServer.csproj" />
   </ItemGroup>

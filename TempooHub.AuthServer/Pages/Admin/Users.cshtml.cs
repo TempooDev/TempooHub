@@ -1,5 +1,12 @@
 using System.Text;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.WebUtilities;
 
 namespace TempooHub.AuthServer.Pages.Admin
 {
@@ -23,7 +30,7 @@ namespace TempooHub.AuthServer.Pages.Admin
         public List<string> AllRoles { get; set; } = new();
         public async Task OnGetAsync()
         {
-            var users = await _userManager.Users.ToListAsync();
+            var users = await _userManager.Users.ToListAsync<IdentityUser>();
             AllRoles = await _roleManager.Roles.Select(r => r.Name ?? "").ToListAsync();
             foreach (var user in users)
             {

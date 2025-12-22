@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Scalar.AspNetCore;
 
 namespace TempooHub.AuthServer.Extensions
 {
@@ -24,8 +26,8 @@ namespace TempooHub.AuthServer.Extensions
                 ClaimsPrincipal claimsUser,
                 UserManager<IdentityUser> userManager) =>
             {
-                var userId = claimsUser.FindFirstValue(ClaimTypes.NameIdentifier);
-                if (userId == null) return Results.Unauthorized();
+                var userId = userManager.GetUserId(claimsUser);
+                if (userId == null) return Results.Conflict();
 
                 var user = await userManager.FindByIdAsync(userId);
                 if (user == null) return Results.NotFound();

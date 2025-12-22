@@ -1,3 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
+
 namespace TempooHub.AuthServer.Pages.Admin
 {
     [Authorize(Roles = "Admin")]
@@ -17,8 +23,8 @@ namespace TempooHub.AuthServer.Pages.Admin
 
         public async Task OnGetAsync()
         {
-            Roles = await _roleManager.Roles.ToListAsync();
-        }
+                Roles = await _roleManager.Roles.ToListAsync<IdentityRole>();
+            }
 
         public async Task<IActionResult> OnPostCreateAsync()
         {

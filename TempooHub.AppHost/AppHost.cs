@@ -18,16 +18,12 @@ var authServer = builder.AddProject<Projects.TempooHub_AuthServer>("tempoohub-au
     .WithReference(tempooHubAuthDb)
     .WaitFor(tempooHubAuthDb);
 
-// 2. API de Negocio (SaaS)
 var api = builder.AddProject<Projects.TempooHub_Api>("tempoohub-api")
     .WithReference(tempooHubDb)
-    // Esto inyecta la URL del authServer para la validación JWT
     .WithReference(authServer) 
     .WaitFor(tempooHubDb);
 
-// 3. Gateway (YARP)
-// Es el único que necesita ser externo si Angular vive en el mismo dominio de red
-var gateway = builder.AddProject<Projects.TempooHub_Gateway>("gateway")
+var gateway = builder.AddProject<Projects.TempooHub_Proxy>("gateway")
     .WithReference(authServer)
     .WithReference(api)
     .WithExternalHttpEndpoints();
