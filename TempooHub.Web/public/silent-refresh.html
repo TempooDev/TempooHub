@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Silent Refresh</title>
+  </head>
+  <body>
+    <script>
+      try {
+        // send current location (with hash) back to parent window
+        window.parent.postMessage(location.href, window.location.origin);
+      } catch (e) {
+        console.error(e);
+      }
+    </script>
+  </body>
+</html>

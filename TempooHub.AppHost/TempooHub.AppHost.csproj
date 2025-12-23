@@ -10,12 +10,13 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.JavaScript" Version="13.1.0" />
-    <PackageReference Include="Aspire.Hosting.Keycloak" Version="13.1.0-preview.1.25616.3" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.1.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../TempooHub.Proxy/TempooHub.Proxy.csproj" />
     <ProjectReference Include="..\TempooHub.Api\TempooHub.Api.csproj" />
+    <ProjectReference Include="..\TempooHub.AuthServer\TempooHub.AuthServer.csproj" />
   </ItemGroup>
 
 </Project>

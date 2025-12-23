@@ -20,7 +20,7 @@ export class DashboardPage {
   }
 
   loadApiStatus() {
-    this.http.get<ResultObject>('/api').subscribe({
+    this.http.get<ResultObject>('/api/v1').subscribe({
       next: result => { this.apiStatus.set(result.message); },
       error: err => { this.apiStatus.set(`Error: ${err.message}`); }
     });

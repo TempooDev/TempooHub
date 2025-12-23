@@ -1,25 +1,35 @@
-import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { APP_INITIALIZER, ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
+// 1. Importa withInterceptors y tu función interceptora
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
-import { provideKeycloakAngular } from './keycloak.config';
-import { createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, includeBearerTokenInterceptor } from 'keycloak-angular';
+import { AuthService } from './shared/auth.service';
+import { authInterceptor } from './auth.interceptor';
 
-const allUrlsCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
-  urlPattern: /.*/ // todas las URLs
-});
+function initializeAuth(authService: AuthService) {
+  return () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      return authService.checkStatus();
+    }
+    return Promise.resolve();
+  };
+}
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideNoopAnimations(),
-    provideKeycloakAngular(),
-    provideHttpClient(withInterceptors([includeBearerTokenInterceptor])),
+    provideHttpClient(
+      withInterceptors([authInterceptor]) 
+    ),
     {
-      provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG,
-      useValue: [allUrlsCondition]
+      provide: APP_INITIALIZER,
+      useFactory: initializeAuth,
+      deps: [AuthService],
+      multi: true
     }
   ]
 };

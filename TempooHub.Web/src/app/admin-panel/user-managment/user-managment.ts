@@ -19,14 +19,14 @@ export class UserManagment {
   }
 
   loadAdminRole() {
-    this.http.get<ResultObject>('/api/admin').subscribe({
+    this.http.get<ResultObject>('/api/v1/admin').subscribe({
       next: result => { this.checkAdminRole.set(result.message); },
       error: err => { this.checkAdminRole.set(`Error: ${err.message}`); }
     });
   }
 
   loadApiStatus() {
-    this.http.get<ResultObject>('/api/user').subscribe({
+    this.http.get<ResultObject>('/api/v1/user').subscribe({
       next: result => { this.apiStatus.set(result.message); },
       error: err => { this.apiStatus.set(`Error: ${err.message}`); }
     });

@@ -1,0 +1,50 @@
+﻿@page
+@model TempooHub.AuthServer.Pages.Admin.LoginModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{ Layout = null; }
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Login Admin - TempooHub</title>
+</head>
+<body class="bg-slate-950 text-slate-100 flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-md bg-slate-900 border border-slate-800 p-8 rounded-2xl shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-white">Tempoo<span class="text-blue-500">Hub</span></h1>
+            <p class="text-slate-400 mt-2">Panel de Administración</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="mb-4 p-3 rounded bg-red-900/50 border border-red-800 text-red-200 text-sm">
+                <div asp-validation-summary="All"></div>
+            </div>
+        }
+
+        <form method="post" class="space-y-6">
+            <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Correo Electrónico</label>
+                <input asp-for="Input.Email" type="email" placeholder="admin@tempoohub.com" 
+                       class="w-full bg-slate-800 border border-slate-700 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-slate-400 mb-1">Contraseña</label>
+                <input asp-for="Input.Password" type="password" placeholder="••••••••" 
+                       class="w-full bg-slate-800 border border-slate-700 p-3 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition">
+            </div>
+            
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-lg transition shadow-lg shadow-blue-900/20">
+                Iniciar Sesión
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <a href="/" class="text-sm text-slate-500 hover:text-slate-300 transition">← Volver al inicio</a>
+        </div>
+    </div>
+</body>
+</html>

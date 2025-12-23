@@ -1,0 +1,91 @@
+@page
+@model TempooHub.AuthServer.Pages.Admin.UsersModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{ Layout = null; }
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 p-8">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-end mb-4">
+            <a href="/Admin/Roles" class="text-sm text-slate-300 hover:text-white">Gestionar Roles</a>
+        </div>
+        @if (TempData["TempPassword"] != null) {
+            <div class="mb-4 p-4 rounded bg-green-800 text-green-100">
+                <strong>Contraseña temporal para @TempData["TempPasswordUser"]:</strong>
+                <div class="mt-2 font-mono">@TempData["TempPassword"]</div>
+            </div>
+        }
+        @if (TempData["TempPasswordError"] != null) {
+            <div class="mb-4 p-4 rounded bg-red-800 text-red-100">@TempData["TempPasswordError"]</div>
+        }
+        @if (TempData["ConfirmationData"] != null) {
+            <div class="mb-4 p-4 rounded bg-blue-800 text-blue-100">
+                <strong>Datos de confirmación (copiar para construir el enlace):</strong>
+                <div class="mt-2 font-mono">@TempData["ConfirmationData"]</div>
+            </div>
+        }
+        <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl mb-8">
+            <h2 class="text-xl font-bold mb-4">Crear Nuevo Usuario</h2>
+            <form method="post" asp-page-handler="Create" class="flex gap-4">
+                <input asp-for="NewUserEmail" type="email" placeholder="Email" class="bg-slate-800 border border-slate-700 p-2 rounded flex-1">
+                <input asp-for="NewUserPassword" type="password" placeholder="Password" class="bg-slate-800 border border-slate-700 p-2 rounded flex-1">
+                <button class="bg-blue-600 px-6 py-2 rounded font-bold">Crear</button>
+            </form>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
+            <table class="w-full text-left">
+                <thead class="bg-slate-800 text-slate-400">
+                    <tr>
+                        <th class="p-4">Usuario</th>
+                        <th class="p-4">Email Verificado</th>
+                        <th class="p-4">Roles (Selecciona para quitar/poner)</th>
+                        <th class="p-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                    @foreach (var user in Model.Users) {
+                        <tr class="hover:bg-slate-800/30">
+                            <td class="p-4 font-medium">@user.Email</td>
+                            <td class="p-4">@(user.EmailConfirmed ? "Sí" : "No")</td>
+                            <td class="p-4">
+                                <form method="post" asp-page-handler="UpdateRoles" class="flex items-center gap-3">
+                                    <input type="hidden" name="userId" value="@user.Id" />
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach (var role in Model.AllRoles) {
+                                            <label class="flex items-center space-x-1 bg-slate-800 px-2 py-1 rounded cursor-pointer hover:bg-slate-700">
+                                                <input type="checkbox" name="selectedRoles" value="@role" 
+                                                       @(user.Roles.Contains(role) ? "checked=\"checked\"" : "")>
+                                                <span class="text-xs">@role</span>
+                                            </label>
+                                        }
+                                    </div>
+                                    <button class="text-xs bg-slate-700 hover:bg-blue-600 px-2 py-1 rounded transition">Guardar Roles</button>
+                                </form>
+                            </td>
+                            <td class="p-4 flex gap-2">
+                                <form method="post" asp-page-handler="SendConfirmation" asp-route-userId="@user.Id" onsubmit="return confirm('Enviar token de confirmación por correo (mostrado como datos)?')">
+                                    <button class="text-xs bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded">Recordar confirmar email</button>
+                                </form>
+
+                                <form method="post" asp-page-handler="GenerateTempPassword" asp-route-userId="@user.Id" onsubmit="return confirm('Generar contraseña temporal y resetear contraseña del usuario?')">
+                                    <button class="text-xs bg-amber-700 hover:bg-amber-600 px-2 py-1 rounded">Generar contraseña temporal</button>
+                                </form>
+
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@user.Id" onsubmit="return confirm('¿Eliminar?')">
+                                    <button class="text-red-500 text-sm hover:text-red-400">Eliminar Cuenta</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
