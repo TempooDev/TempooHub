@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.WebUtilities;
 
 namespace TempooHub.AuthServer.Pages.Admin
 {
-    [Authorize(Roles = "Admin")] // SOLO administradores pueden entrar
+    [Authorize(AuthenticationSchemes = "Identity.Application", Roles = "Admin")]
     [IgnoreAntiforgeryToken]
     public partial class UsersModel : PageModel
     {

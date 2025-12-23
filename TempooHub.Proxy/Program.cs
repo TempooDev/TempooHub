@@ -1,7 +1,18 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Yarp.ReverseProxy.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AngularPolicy", policy =>
+    {
+        policy.WithOrigins(builder.Configuration["AllowedOrigins"]?.Split(',') ?? new[] { "http://localhost:4200" })
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 // Cargamos la configuración de YARP
 var proxyBuilder = builder.Services.AddReverseProxy();
@@ -53,5 +64,13 @@ proxyBuilder.ConfigureHttpClient((context, handler) => {
 });
 
 var app = builder.Build();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
+app.UseCors("AngularPolicy");
+
 app.MapReverseProxy();
 app.Run();

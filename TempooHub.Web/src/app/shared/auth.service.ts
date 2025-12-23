@@ -20,7 +20,7 @@ export class AuthService {
 
   // Método para verificar sesión al cargar la app
   checkStatus() {
-    return this.http.get<UserProfile>(`${this.API_URL}/manage/user-details`, { withCredentials: true }).pipe(
+    return this.http.get<UserProfile>(`${this.API_URL}/manage/user-details`).pipe(
       tap(user => this.currentUser.set(user)),
       catchError(() => {
         this.currentUser.set(null);
@@ -30,18 +30,20 @@ export class AuthService {
   }
 
   login(email: string, password: string) {
-    return this.http.post(`${this.API_URL}/login?useCookies=true`, { email, password }).pipe(
-      tap(() => {
-        // Tras el login, actualizamos la signal de usuario
-        this.checkStatus().subscribe();
+    return this.http.post<any>(`${this.API_URL}/auth/login`, { email, password }).pipe(
+      tap(response => {
+        if (response && response.accessToken) {
+          localStorage.setItem('token', response.accessToken);
+          this.checkStatus().subscribe();
+        }
       })
     );
   }
 
   logout() {
-    return this.http.post(`${this.API_URL}/logout`, {}, { withCredentials: true }).pipe(
+    return this.http.post(`${this.API_URL}/logout`, {}).pipe(
       tap(() => {
-        this.currentUser.set(null);
+        localStorage.removeItem('token');
         this.router.navigate(['/login']);
       })
     );

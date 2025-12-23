@@ -2,12 +2,19 @@ import { APP_INITIALIZER, ApplicationConfig, provideBrowserGlobalErrorListeners 
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
-import { provideHttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
-import { AuthInterceptor } from './auth.interceptor';
+// 1. Importa withInterceptors y tu función interceptora
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { AuthService } from './shared/auth.service';
+import { authInterceptor } from './auth.interceptor';
 
 function initializeAuth(authService: AuthService) {
-  return () => authService.checkStatus();
+  return () => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      return authService.checkStatus();
+    }
+    return Promise.resolve();
+  };
 }
 
 export const appConfig: ApplicationConfig = {
@@ -15,12 +22,9 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
     provideNoopAnimations(),
-    { 
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor, 
-      multi: true 
-    },
-    provideHttpClient(),
+    provideHttpClient(
+      withInterceptors([authInterceptor]) 
+    ),
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAuth,

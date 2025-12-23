@@ -1,5 +1,7 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.EntityFrameworkCore;
@@ -29,11 +31,13 @@ namespace TempooHub.AuthServer.Extensions
                 options.User.RequireUniqueEmail = true;
             })
             .AddRoles<IdentityRole>()
-            .AddEntityFrameworkStores<ApplicationDbContext>();
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
 
             // 2. Agregamos soporte para JWT sin hacerlo el "Default" global, 
             // para que no pise a las Cookies de Angular.
-            services.AddAuthentication()
+            services.AddAuthentication(options =>
+                { })
                 .AddJwtBearer(options =>
                 {
                     options.Authority = authority;
@@ -43,25 +47,32 @@ namespace TempooHub.AuthServer.Extensions
                         ValidateIssuer = true,
                         ValidIssuer = authority,
                         ValidateAudience = false,
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
+                        ValidateLifetime = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
+                        ClockSkew = TimeSpan.Zero
                     };
                 });
 
-            // 3. ¡CRUCIAL! Configurar la cookie para que viaje a través del Gateway
+            services.AddAuthorization(options =>
+    {
+        // Creamos una política que acepte AMBOS esquemas por defecto
+        var defaultAuthorizationPolicyBuilder = new AuthorizationPolicyBuilder(
+            JwtBearerDefaults.AuthenticationScheme,
+            IdentityConstants.ApplicationScheme);
+
+        defaultAuthorizationPolicyBuilder = defaultAuthorizationPolicyBuilder.RequireAuthenticatedUser();
+        options.DefaultPolicy = defaultAuthorizationPolicyBuilder.Build();
+    });
+
+            // 4. Ajuste de la Cookie para Razor Pages
             services.ConfigureApplicationCookie(options =>
             {
-                options.Cookie.SameSite = SameSiteMode.Lax; // Permite que la cookie se envíe desde el puerto de Angular al del Gateway
-                options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Importante con SameSite Lax/None
-                options.Cookie.Name = ".TempooHub.Identity";
-
-                // Evita que intente redirigir a una página de login (307)
-                options.Events.OnRedirectToLogin = context =>
-                {
-                    context.Response.StatusCode = 401;
-                    return Task.CompletedTask;
-                };
+                options.LoginPath = "/Admin/Login";
+                options.AccessDeniedPath = "/Admin/Login";
+                options.Cookie.Name = "TempooHub.Admin.Auth";
             });
         }
+
         public static void AddAuthCors(this WebApplicationBuilder builder)
         {
             var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
@@ -109,6 +120,7 @@ namespace TempooHub.AuthServer.Extensions
             builder.AddAuthDatabase();
             builder.AddAuthCors();
             builder.AddAuthInfrastructure();
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
         }
     }
 }

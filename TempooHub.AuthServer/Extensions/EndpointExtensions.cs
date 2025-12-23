@@ -1,5 +1,9 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
+using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 
 namespace TempooHub.AuthServer.Extensions
@@ -56,6 +60,34 @@ namespace TempooHub.AuthServer.Extensions
 
                 await userManager.AddToRoleAsync(user, request.RoleName);
                 return Results.Ok($"Rol {request.RoleName} asignado");
+            });
+
+            app.MapPost("/auth/login", async (LoginRequest login, UserManager<IdentityUser> userManager, IConfiguration config) =>
+            {
+                var user = await userManager.FindByEmailAsync(login.Email);
+                if (user != null && await userManager.CheckPasswordAsync(user, login.Password))
+                {
+                    var roles = await userManager.GetRolesAsync(user);
+                    var jwtKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Authentication:JwtKey"]!));
+                    var creds = new SigningCredentials(jwtKey, SecurityAlgorithms.HmacSha256);
+
+                    var claims = new List<Claim> {
+                        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                        new Claim(JwtRegisteredClaimNames.Email, user.Email!)
+                    };
+                    foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));
+
+                    var token = new JwtSecurityToken(
+                        issuer: config["Authentication:Authority"],
+                        audience: null,
+                        claims: claims,
+                        expires: DateTime.Now.AddHours(3),
+                        signingCredentials: creds
+                    );
+
+                    return Results.Ok(new { accessToken = new JwtSecurityTokenHandler().WriteToken(token) });
+                }
+                return Results.Unauthorized();
             });
 
             app.MapPost("/logout", async (SignInManager<IdentityUser> signInManager) =>
