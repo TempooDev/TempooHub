@@ -1,9 +1,10 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+builder.AddDockerComposeEnvironment("env");
+
 // Parámetros y Base de Datos
 var user = builder.AddParameter("tempoohub-user");
 var pass = builder.AddParameter("tempoohub-password", true);
-
 
 var jwtKey = builder.AddParameter("jwt-key", true);
 
