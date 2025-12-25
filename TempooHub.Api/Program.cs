@@ -53,7 +53,7 @@ app.MapGet("/data", (ClaimsPrincipal user) =>
 {
     return Results.Ok(new { 
         Message = "Datos protegidos alcanzados", 
-        User = user.Claims.Select(c => new { c.Type, c.Value }) 
+        User = user.Claims.Where(x=> x.Type == ClaimTypes.Email).Select(x=> x.Value).FirstOrDefault() 
     });
 }).RequireAuthorization();
 app.Run();
