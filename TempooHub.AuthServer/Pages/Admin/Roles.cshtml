@@ -37,9 +37,12 @@
                         <tr class="hover:bg-slate-800/30">
                             <td class="p-4 font-medium">@role.Name</td>
                             <td class="p-4">
-                                <form method="post" asp-page-handler="Delete" asp-route-id="@role.Id" onsubmit="return confirm('¿Eliminar rol?')">
-                                    <button class="text-red-500 text-sm hover:text-red-400">Eliminar</button>
-                                </form>
+                                <div class="flex gap-4">
+                                    <a href="/Admin/RoleClaims/@role.Id" class="text-blue-500 text-sm hover:text-blue-400">Claims</a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@role.Id" onsubmit="return confirm('¿Eliminar rol?')">
+                                        <button class="text-red-500 text-sm hover:text-red-400">Eliminar</button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     }

@@ -6,6 +6,7 @@ import { catchError, of, tap } from 'rxjs';
 export interface UserProfile {
   email: string;
   roles: string[];
+  claims: { type: string, value: string }[];
 }
 
 @Injectable({

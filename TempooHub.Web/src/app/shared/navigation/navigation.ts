@@ -7,7 +7,7 @@ import { BadgeModule } from 'primeng/badge';
 import { RippleModule } from 'primeng/ripple';
 import { AvatarModule } from 'primeng/avatar';
 import { MenuItem } from 'primeng/api';
-import { HasRolePipe } from '../pipes/has-role.pipe';
+import { HasClaimPipe } from '../pipes/has-role.pipe';
 
 @Component({
   selector: 'th-navigation',
@@ -15,11 +15,11 @@ import { HasRolePipe } from '../pipes/has-role.pipe';
   templateUrl: './navigation.html',
   styles: ``,
   standalone: true,
-  providers: [HasRolePipe]
+  providers: [HasClaimPipe]
 })
 export class Navigation implements OnInit {
   menuItems: MenuItem[] = [];
-  private hasRolePipe = inject(HasRolePipe);
+  private hasClaimPipe = inject(HasClaimPipe);
 
   ngOnInit(): void {
     this.menuItems = this.processRoutes(ROUTES);
@@ -28,10 +28,14 @@ export class Navigation implements OnInit {
   private processRoutes(routes: MenuItem[]): MenuItem[] {
     return routes.map(item => {
       const newItem = { ...item };
-      const hasAccess = this.hasRolePipe.transform(item['data']?.['role']);
-      
-      if (!hasAccess) {
-        newItem.disabled = true;
+      const claimType = item['data']?.['claimType'];
+      const claimValue = item['data']?.['claimValue'];
+
+      if (claimType) {
+        const hasAccess = this.hasClaimPipe.transform(claimType, claimValue);
+        if (!hasAccess) {
+          newItem.disabled = true;
+        }
       }
 
       if (item.items) {

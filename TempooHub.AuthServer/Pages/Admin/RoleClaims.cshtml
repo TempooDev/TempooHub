@@ -1,0 +1,63 @@
+@page "{id}"
+@model TempooHub.AuthServer.Pages.Admin.RoleClaimsModel
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{ Layout = null; }
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100 p-8">
+<div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold">Gestión de Claims para el Rol: @Model.Role.Name</h2>
+        <a href="/Admin/Roles" class="text-sm text-slate-300 hover:text-white">Volver a Roles</a>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 p-6 rounded-xl mb-6">
+        <form method="post" asp-page-handler="Create" asp-route-id="@Model.Role.Id" class="flex gap-4">
+            <input asp-for="NewClaimType" placeholder="Tipo de Claim" class="bg-slate-800 border border-slate-700 p-2 rounded flex-1">
+            <input asp-for="NewClaimValue" placeholder="Valor del Claim" class="bg-slate-800 border border-slate-700 p-2 rounded flex-1">
+            <button class="bg-blue-600 px-6 py-2 rounded font-bold">Añadir Claim</button>
+        </form>
+    </div>
+
+    @if (Model.Claims.Any())
+    {
+        <div class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
+            <table class="w-full text-left">
+                <thead class="bg-slate-800 text-slate-400">
+                <tr>
+                    <th class="p-4">Tipo</th>
+                    <th class="p-4">Valor</th>
+                    <th class="p-4">Acciones</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                @foreach (var claim in Model.Claims)
+                {
+                    <tr class="hover:bg-slate-800/30">
+                        <td class="p-4 font-medium">@claim.Type</td>
+                        <td class="p-4 font-medium">@claim.Value</td>
+                        <td class="p-4">
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@Model.Role.Id" asp-route-claimType="@claim.Type" asp-route-claimValue="@claim.Value" onsubmit="return confirm('¿Eliminar claim?')">
+                                <button class="text-red-500 text-sm hover:text-red-400">Eliminar</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-12">
+            <p class="text-slate-500">No hay claims para este rol.</p>
+        </div>
+    }
+</div>
+</body>
+</html>

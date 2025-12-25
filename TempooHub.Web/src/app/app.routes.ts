@@ -4,8 +4,7 @@ import { LayoutComponent } from './shared/layout/layout';
 import { AdminPanelPage } from './admin-panel/admin-panel';
 import { APP_ROUTES } from './shared/constants/navigation-routes';
 import { UserManagment } from './admin-panel/user-managment/user-managment';
-import { canActivateAuthRole } from './shared/guards/auth-role-guard';
-import { ROLES } from './shared/constants/roles';
+import { canActivateAuthClaim } from './shared/guards/auth-role-guard';
 
 export const routes: Routes = [
     {
@@ -15,7 +14,7 @@ export const routes: Routes = [
     {
         path: '',
         component: LayoutComponent,
-        canActivateChild: [canActivateAuthRole],
+        canActivateChild: [canActivateAuthClaim],
         children: [
             {
                 path: APP_ROUTES.HOME,
@@ -25,11 +24,11 @@ export const routes: Routes = [
             {
                 path: APP_ROUTES.ADMIN,
                 component: AdminPanelPage,
-                data: { role: ROLES.PREMIUM }
+                data: { claimType: 'permission', claimValue: 'premium_feature' }
             },
             {
                 path: `${APP_ROUTES.ADMIN}/${APP_ROUTES.USER_MANAGEMENT}`,
-                data: { role: ROLES.ENTERPRISE },
+                data: { claimType: 'permission', claimValue: 'enterprise_feature' },
                 component: UserManagment
             }
         ]

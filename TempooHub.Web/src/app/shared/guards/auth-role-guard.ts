@@ -2,22 +2,21 @@ import { ActivatedRouteSnapshot, CanActivateFn, Router, RouterStateSnapshot } fr
 import { inject } from '@angular/core';
 import { AuthService } from '../auth.service';
 
-export const canActivateAuthRole: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+export const canActivateAuthClaim: CanActivateFn = (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
   const user = authService.currentUser();
-  const requiredRole = route.data['role'];
+  const requiredClaimType = route.data['claimType'];
+  const requiredClaimValue = route.data['claimValue'];
 
   if (!user) {
     return router.parseUrl('/login');
   }
 
-  if (!requiredRole) return true;
+  if (!requiredClaimType) return true;
 
-  const userRoles: string[] = user.roles || [];
-  
-  if (userRoles.includes(requiredRole)) {
+  if (user.claims && user.claims.some(claim => claim.type === requiredClaimType && (!requiredClaimValue || claim.value === requiredClaimValue))) {
     return true;
   }
 

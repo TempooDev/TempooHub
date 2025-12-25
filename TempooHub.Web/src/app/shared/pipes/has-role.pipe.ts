@@ -2,21 +2,26 @@ import { inject, Pipe, PipeTransform } from '@angular/core';
 import { AuthService } from '../auth.service';
 
 @Pipe({
-  name: 'hasRole',
+  name: 'hasClaim',
   standalone: true,
 })
-export class HasRolePipe implements PipeTransform {
+export class HasClaimPipe implements PipeTransform {
   private authService = inject(AuthService);
 
-  transform(role: string | undefined): boolean {
-    if (!role) {
+  transform(claimType: string, claimValue?: string): boolean {
+    if (!claimType) {
       return true;
     }
     const user = this.authService.currentUser();
-    if (!user) {
+    if (!user || !user.claims) {
       return false;
     }
-    const userRoles: string[] = user.roles || [];
-    return userRoles.includes(role);
+
+    return user.claims.some(claim => {
+      if (claim.type === claimType) {
+        return claimValue ? claim.value === claimValue : true;
+      }
+      return false;
+    });
   }
 }

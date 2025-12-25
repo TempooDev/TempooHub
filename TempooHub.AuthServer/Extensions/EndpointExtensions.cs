@@ -28,7 +28,8 @@ namespace TempooHub.AuthServer.Extensions
         {
             app.MapGet("/manage/user-details", async (
                 ClaimsPrincipal claimsUser,
-                UserManager<IdentityUser> userManager) =>
+                UserManager<IdentityUser> userManager,
+                RoleManager<IdentityRole> roleManager) =>
             {
                 var userId = userManager.GetUserId(claimsUser);
                 if (userId == null) return Results.Conflict();
@@ -37,11 +38,22 @@ namespace TempooHub.AuthServer.Extensions
                 if (user == null) return Results.NotFound();
 
                 var roles = await userManager.GetRolesAsync(user);
+                var claims = new List<Claim>();
+
+                foreach (var roleName in roles)
+                {
+                    var role = await roleManager.FindByNameAsync(roleName);
+                    if (role != null)
+                    {
+                        claims.AddRange(await roleManager.GetClaimsAsync(role));
+                    }
+                }
 
                 return Results.Ok(new
                 {
                     email = user.Email,
-                    roles = roles
+                    roles = roles,
+                    claims = claims.Select(c => new { c.Type, c.Value })
                 });
             }).RequireAuthorization();
 
@@ -79,7 +91,7 @@ namespace TempooHub.AuthServer.Extensions
 
                     var token = new JwtSecurityToken(
                         issuer: config["Authentication:Authority"],
-                        audience: null,
+                        audience: config["Authentication:Audience"],
                         claims: claims,
                         expires: DateTime.Now.AddHours(3),
                         signingCredentials: creds

@@ -23,7 +23,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             ValidateIssuer = true,
             ValidIssuer = authority,
-            ValidateAudience = false, // Permite que este token sirva para cualquier API del SaaS
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["Authentication:Audience"],
             ValidateLifetime = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!)),
             ClockSkew = TimeSpan.Zero // El token expira exactamente cuando dice el payload
@@ -47,11 +48,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapGet("/", () => Results.Ok(new ResultObject("Okey")));
+// A través del gateway, este endpoint se expone en /api/v1/data
 app.MapGet("/data", (ClaimsPrincipal user) => 
 {
     return Results.Ok(new { 
         Message = "Datos protegidos alcanzados", 
-        User = user.Identity?.Name 
+        User = user.Claims.Select(c => new { c.Type, c.Value }) 
     });
 }).RequireAuthorization();
 app.Run();
