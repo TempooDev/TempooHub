@@ -1,4 +1,5 @@
 import { MenuItem } from "primeng/api";
+import { ROLES } from "./roles";
 
 export const APP_ROUTES = {
     HOME: '',
@@ -25,11 +26,13 @@ export const ROUTES: MenuItem[] = [
         label: 'Admin',
         routerLink: getPath('ADMIN'),
         icon: 'pi pi-cog',
+        data: { role: ROLES.PREMIUM },
         items: [
             {
                 label: 'User Management',
                 routerLink: getPath('USER_MANAGEMENT'),
-                icon: 'pi pi-users'
+                icon: 'pi pi-users',
+                data: { role: ROLES.ENTERPRISE }
             }
         ]
     }

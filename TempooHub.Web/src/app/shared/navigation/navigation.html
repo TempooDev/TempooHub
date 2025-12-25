@@ -1,5 +1,5 @@
 <div class="card">
-    <p-menu [model]="routes" class="flex justify-center" styleClass="w-full md:w-64 h-full flex flex-col">
+    <p-menu [model]="menuItems" class="flex justify-center" styleClass="w-full md:w-64 h-full flex flex-col">
         <ng-template #start>
             <span class="inline-flex items-center gap-1 px-2 py-2">
                 <a routerLink="/" class="text-xl font-semibold">Tempoo<span class="text-primary">Hub</span></a>
@@ -7,6 +7,7 @@
         </ng-template>
 
         <ng-template #submenuheader let-item>
+            @if(!item.disabled){
             <a [routerLink]="item.routerLink" pRipple class="flex items-center p-menu-item-link">
                 <span [class]="item.icon"></span>
                 <span class="text-primary font-bold">{{ item.label }}</span>
@@ -18,9 +19,17 @@
                     item['shortcut'] }}</span>
                 }
             </a>
+            } @else {
+            <a class="flex items-center p-menu-item-link cursor-not-allowed opacity-60">
+                <span [class]="item.icon"></span>
+                <span class="text-primary font-bold">{{ item.label }}</span>
+                <span class="pi pi-lock ml-auto"></span>
+            </a>
+            }
         </ng-template>
 
         <ng-template #item let-item>
+            @if(!item.disabled) {
             <a [routerLink]="item.routerLink" pRipple class="flex items-center p-menu-item-link">
                 <span [class]="item.icon"></span>
                 <span class="ml-2">{{ item.label }}</span>
@@ -33,6 +42,13 @@
                     item['shortcut'] }}</span>
                 }
             </a>
+            } @else {
+            <a class="flex items-center p-menu-item-link cursor-not-allowed opacity-60">
+                <span [class]="item.icon"></span>
+                <span class="ml-2">{{ item.label }}</span>
+                <span class="pi pi-lock ml-auto"></span>
+            </a>
+            }
         </ng-template>
     </p-menu>
 </div>

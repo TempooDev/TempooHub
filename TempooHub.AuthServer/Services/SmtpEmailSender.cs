@@ -6,14 +6,9 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 namespace TempooHub.AuthServer.Services
 {
 
-    public class SmtpEmailSender : IEmailSender
+    public class SmtpEmailSender(IOptions<SmtpOptions> options) : IEmailSender
     {
-        private readonly SmtpOptions _options;
-
-        public SmtpEmailSender(IOptions<SmtpOptions> options)
-        {
-            _options = options.Value;
-        }
+        private readonly SmtpOptions _options = options.Value;
 
         public async Task SendEmailAsync(string email, string subject, string htmlMessage)
         {

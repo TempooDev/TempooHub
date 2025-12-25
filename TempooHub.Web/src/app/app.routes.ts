@@ -25,11 +25,11 @@ export const routes: Routes = [
             {
                 path: APP_ROUTES.ADMIN,
                 component: AdminPanelPage,
-                data: { role: ROLES.ADMIN }
+                data: { role: ROLES.PREMIUM }
             },
             {
                 path: `${APP_ROUTES.ADMIN}/${APP_ROUTES.USER_MANAGEMENT}`,
-                data: { role: ROLES.USER_MANAGEMENT },
+                data: { role: ROLES.ENTERPRISE },
                 component: UserManagment
             }
         ]

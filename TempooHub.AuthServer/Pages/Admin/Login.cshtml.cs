@@ -5,16 +5,10 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace TempooHub.AuthServer.Pages.Admin
 {
-    public class LoginModel : PageModel
+    public class LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger) : PageModel
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly ILogger<LoginModel> _logger;
-
-        public LoginModel(SignInManager<IdentityUser> signInManager, ILogger<LoginModel> logger)
-        {
-            _signInManager = signInManager;
-            _logger = logger;
-        }
+        private readonly SignInManager<IdentityUser> _signInManager = signInManager;
+        private readonly ILogger<LoginModel> _logger = logger;
 
         [BindProperty]
         public InputModel Input { get; set; } = new();
